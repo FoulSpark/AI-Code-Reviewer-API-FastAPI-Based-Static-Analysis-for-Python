@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*.pyd
+*.pyo
+
+.venv/
+venv/
+
+reviews.db
+*.db
+
+.streamlit/
+
+.DS_Store

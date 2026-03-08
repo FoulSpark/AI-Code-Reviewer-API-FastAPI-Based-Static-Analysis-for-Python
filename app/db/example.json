@@ -1,0 +1,27 @@
+{
+  "review_id": "rev_123",
+  "status": "warn",
+  "overall_score": 72,
+  "summary": "Code is valid but contains risky execution patterns and moderate complexity.",
+  "issues": [
+    {
+      "type": "security",
+      "severity": "high",
+      "line": 8,
+      "message": "Use of eval() detected.",
+      "suggestion": "Avoid eval(). Use safer parsing or explicit logic."
+    },
+    {
+      "type": "style",
+      "severity": "medium",
+      "line": 15,
+      "message": "Function has too many arguments.",
+      "suggestion": "Group related parameters into a config object or dataclass."
+    }
+  ],
+  "metrics": {
+    "line_count": 40,
+    "function_count": 3,
+    "complexity_score": 6
+  }
+}
