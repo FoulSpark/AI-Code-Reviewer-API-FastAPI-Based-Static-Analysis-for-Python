@@ -186,7 +186,3 @@ A sample output object is provided at:
 - **Analysis**: Python `ast` module + simple heuristics
 
 ---
-
-## License
-
-Add a license (MIT/Apache-2.0/etc.) if you plan to share this publicly.
