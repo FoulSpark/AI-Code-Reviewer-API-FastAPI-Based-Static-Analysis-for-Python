@@ -28,15 +28,22 @@ def init_db() -> None:
             issues_json TEXT NOT NULL,
             metrics_json TEXT NOT NULL,
             submitted_code TEXT NOT NULL,
+            source TEXT DEFAULT 'review',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+
+    # Migration: Add source column if it doesn't exist
+    cursor.execute("PRAGMA table_info(reviews)")
+    columns = [row[1] for row in cursor.fetchall()]
+    if 'source' not in columns:
+        cursor.execute("ALTER TABLE reviews ADD COLUMN source TEXT DEFAULT 'review'")
 
     conn.commit()
     conn.close()
 
 
-def save_review(submitted_code: str, review: syntax) -> None:
+def save_review(submitted_code: str, review: syntax, source: str = "review") -> None:
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -48,8 +55,9 @@ def save_review(submitted_code: str, review: syntax) -> None:
             summary,
             issues_json,
             metrics_json,
-            submitted_code
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            submitted_code,
+            source
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         review.review_id,
         review.status.value if hasattr(review.status, "value") else review.status,
@@ -57,7 +65,8 @@ def save_review(submitted_code: str, review: syntax) -> None:
         review.summary,
         json.dumps([issue.model_dump() for issue in review.issues]),
         json.dumps(review.metrics.model_dump()),
-        submitted_code
+        submitted_code,
+        source
     ))
 
     conn.commit()

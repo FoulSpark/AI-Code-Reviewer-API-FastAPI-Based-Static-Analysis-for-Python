@@ -1,163 +1,121 @@
-# AI Code Reviewer
+# 🚀 Agentic AI Code Reviewer & Generator
 
-A lightweight **Python code review service** with:
-
-- A **FastAPI** backend that analyzes submitted Python code.
-- A **Streamlit** UI for pasting code and viewing results.
-- **SQLite** persistence (`reviews.db`) so you can fetch past reviews by ID.
-
-It performs a basic, deterministic review (no LLM required) across:
-
-- Syntax validity
-- Security anti-patterns
-- Style / maintainability checks
-- Simple complexity heuristics
+A high-performance, **Agent-Driven Code Analysis and Generation** system. This platform combines traditional AST-based static analysis with a cutting-edge **4-Stage Agentic Pipeline** to not only find issues but autonomously fix them and verify the logic.
 
 ---
 
-## Features
+## 🌟 Key Features
 
-- **One-click review** from the Streamlit frontend.
-- **Structured results**: status (`pass`/`warn`/`fail`), overall score, summary, issues, metrics.
-- **Issue severity** levels: `low`, `medium`, `high`.
-- **Metrics**:
-  - `line_count`
-  - `function_count`
-  - `complexity_score` (simple nesting/keyword heuristic)
-- **History**: every review is saved in SQLite and can be retrieved later.
+### 🧠 Agentic AI Studio (New)
+A dedicated environment for **Autonomous Code Generation**. Provide a requirement, and the AI orchestrator will:
+1.  **Understand**: Extract core logic, constraints, and test scenarios.
+2.  **Plan**: Design a symbol table and architectural contract.
+3.  **Implement**: Write the code including a functional self-test footer.
+4.  **Check**: Parallelize Syntax & Semantic validation.
+
+### 🛡️ Safety Interlock
+Every line of AI-generated code passes through a **Static Safety Scan**. 
+- Flags dangerous patterns: `os.remove`, `rmtree`, `subprocess`, `eval`, and unsafe file writes.
+- Requires explicit user confirmation via the UI if risky operations are detected.
+
+### ⚙️ Mechanical & Functional Validation
+We don't just generate code; we prove it works.
+- **Touch Test**: Automatically executes the code in a secure subprocess.
+- **Logic Assertions**: Uses the generated self-test footer to verify that the code handles real inputs correctly before delivery.
+
+### 🔄 Context-Aware Retries
+The pipeline learns from its own failures. If a check fails, the next retry receives the **Failed Code** and **Previous Plan**, allowing the AI to "Refine" instead of just "Repeat."
 
 ---
 
-## Project Structure
+## 🛠️ Tech Stack
+
+- **Core**: FastAPI (Backend), Streamlit (Frontend)
+- **AI Models**: 
+  - **Gemini 1.5 Pro**: Complex Reasoning (Planning, Implementation)
+  - **Gemini 1.5 Flash**: High-speed Validation (Semantic & Syntax Checks)
+- **Analysis**: Python `ast` module, Subprocess Execution Runner
+- **Storage**: SQLite with `agentic` source tracking
+
+---
+
+## 📂 Project Structure
 
 ```text
 ai_code_reviewer/
   app/
-    main.py                  # FastAPI app (API entrypoint)
+    main.py                  # API Endpoints (/review, /generate, /fix)
     Schema/
-      review.py              # Pydantic models (request/response schema)
+      agentic.py             # Agentic Request/Response models
+      review.py              # Static review schemas
     Services/
-      review_engine.py       # Orchestrates all checks, calculates score/status
-      syntax_checker.py      # AST-based syntax validation
-      security_checker.py    # AST-based detection of risky patterns
-      style_checker.py       # Style + basic complexity heuristics
-      scorer.py              # (currently empty)
+      agentic_pipeline.py    # The 4-Stage Orchestrator (The "Brain")
+      review_engine.py       # Static Analysis Orchestrator
+      syntax_checker.py      # AST-based validation
+      security_checker.py    # Detection of risky patterns
     db/
-      storage.py             # SQLite init + save + fetch
-      example.json           # Example response payload
-  streamlit_app.py           # Streamlit UI (frontend)
-  reviews.db                 # SQLite database (created/used at runtime)
+      storage.py             # SQLite persistence with source tracking
+  streamlit_app.py           # Premium UI with Agentic Studio Tab
+  .env                       # API Configuration (Excluded from Git)
 ```
 
 ---
 
-## How It Works (High Level)
+## 🚀 Getting Started
 
-1. The Streamlit UI sends your code to the backend via `POST http://127.0.0.1:8000/review`.
-2. The FastAPI backend runs the code through:
-   - `check_syntax()`
-   - `security_check()`
-   - `check_styling()`
-3. A combined list of issues is produced.
-4. The backend computes:
-   - `metrics` (lines, function count, complexity)
-   - `overall_score` (starts at 100 and subtracts points by severity)
-   - `status` + `summary` (based on whether issues exist and their type)
-5. The review is saved into SQLite (`reviews.db`) and returned to the client.
+### 1. Prerequisites
+- Python 3.9+
+- A Google Gemini API Key
 
----
-
-## API
-
-### `POST /review`
-
-Creates a new review and persists it.
-
-- **Request body**
-
-```json
-{
-  "code": "def add(a,b):\n    return a+b\n",
-  "language": "python"
-}
-```
-
-- **Response body (shape)**
-
-```json
-{
-  "review_id": "rev_1a2b3c4d",
-  "status": "warn",
-  "overall_score": 72,
-  "summary": "Code is syntactically valid but contains risky security patterns.",
-  "issues": [
-    {
-      "type": "security",
-      "severity": "high",
-      "line": 8,
-      "message": "Use of eval() detected.",
-      "suggestion": "Avoid eval(). Use safer parsing or explicit logic."
-    }
-  ],
-  "metrics": {
-    "line_count": 40,
-    "function_count": 3,
-    "complexity_score": 6
-  }
-}
-```
-
-### `GET /review/{review_id}`
-
-Fetches a saved review by ID.
-
-- **Example**
-
-`GET http://127.0.0.1:8000/review/rev_1a2b3c4d`
-
----
-
-## Running Locally
-
-### 1) Create and activate a virtual environment (recommended)
-
-Windows PowerShell:
-
+### 2. Installation
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+# Clone the repo
+git clone https://github.com/FoulSpark/AI-Code-Reviewer-API-FastAPI-Based-Static-Analysis-for-Python.git
+cd AI-Code-Reviewer-API-FastAPI-Based-Static-Analysis-for-Python
+
+# Install dependencies
+pip install fastapi uvicorn streamlit requests pydantic google-generativeai python-dotenv
 ```
 
-### 2) Install dependencies
-
-This repository currently does **not** include a `requirements.txt`.
-
-Install the minimum required packages:
-
-```powershell
-pip install fastapi uvicorn streamlit requests pydantic
+### 3. Configuration
+Create a `.env` file in the root directory:
+```env
+GEMINI_API_KEY=your_key_here
+GEMINI_PRO_MODEL=gemini-2.5-flash
+GEMINI_FLASH_MODEL=gemini-2.5-flash
 ```
 
-### 3) Start the FastAPI backend
-
-From the repository root:
-
+### 4. Running the App
+**Terminal 1 (Backend):**
 ```powershell
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+
 ```
 
-### 4) Start the Streamlit frontend
-
-In a second terminal:
-
+**Terminal 2 (Frontend):**
 ```powershell
 streamlit run streamlit_app.py
 ```
 
-Open the Streamlit URL shown in your terminal (usually `http://localhost:8501`).
+---
+
+## 📖 API Documentation
+
+### `POST /generate`
+Triggers the full 4-stage agentic generation pipeline.
+- **Payload**: `{"user_request": "string", "language": "python"}`
+- **Response**: Robust code + execution metadata.
+
+### `POST /fix`
+Accepts existing code and a list of issues, then autonomously fixes and validates them.
+- **Payload**: `{"code": "...", "issues": [...], "language": "python"}`
+
+### `POST /review`
+Standard AST-based static analysis review.
 
 ---
 
+<<<<<<< HEAD
 ## Notes / Known Gaps
 
 - **Endpoint naming mismatch to be aware of**:
@@ -186,3 +144,7 @@ A sample output object is provided at:
 - **Analysis**: Python `ast` module + simple heuristics
 
 ---
+=======
+## ⚖️ License
+This project is licensed under the MIT License - see the LICENSE file for details.
+>>>>>>> b86db29 (feat: Integrated full Agentic AI Pipeline with Safety Interlock and Functional Validation. Optimized retries for self-correction and refined README for premium branding.)
