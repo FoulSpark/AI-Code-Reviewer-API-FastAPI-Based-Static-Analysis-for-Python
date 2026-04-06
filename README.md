@@ -115,7 +115,7 @@ Standard AST-based static analysis review.
 
 ---
 
-<<<<<<< HEAD
+HEAD
 ## Notes / Known Gaps
 
 - **Endpoint naming mismatch to be aware of**:
